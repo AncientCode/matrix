@@ -37,52 +37,47 @@ void LoadSettings()
 	char *hugechar = malloc(4096);
 	char *hptr = hugechar;
 
-	if(hugechar == 0)
+	if (hugechar == 0)
 		return;
 
 	hugechar[0] = '\0';
 
 	RegCreateKeyEx(HKEY_CURRENT_USER, "Software\\Catch22\\Matrix Screen Saver", 0,
-		"", 0, KEY_READ, NULL, &hkey, NULL);
+	               "", 0, KEY_READ, NULL, &hkey, NULL);
 
 	len = sizeof value;
-	if(ERROR_SUCCESS == RegQueryValueEx(hkey, "MessageSpeed", 0, 0, (BYTE *)&value, &len))
-	{
-		if(value >= MSGSPEED_MIN && value <= MSGSPEED_MAX)
+	if (ERROR_SUCCESS == RegQueryValueEx(hkey, "MessageSpeed", 0, 0, (BYTE *)&value, &len)) {
+		if (value >= MSGSPEED_MIN && value <= MSGSPEED_MAX)
 			g_nMessageSpeed = value;
 	}
 
 	len = sizeof(value);
-	if(ERROR_SUCCESS == RegQueryValueEx(hkey, "MatrixSpeed",  0, 0, (BYTE *)&value, &len))
-	{
-		if(value >= SPEED_MIN && value <= SPEED_MAX)
+	if (ERROR_SUCCESS == RegQueryValueEx(hkey, "MatrixSpeed", 0, 0, (BYTE *)&value, &len)) {
+		if (value >= SPEED_MIN && value <= SPEED_MAX)
 			g_nMatrixSpeed  = value;
 	}
-	
+
 	len = sizeof(value);
-	if(ERROR_SUCCESS == RegQueryValueEx(hkey, "Density",      0, 0, (BYTE *)&value, &len))
-	{
-		if(value >= DENSITY_MIN && value <= DENSITY_MAX)
+	if (ERROR_SUCCESS == RegQueryValueEx(hkey, "Density", 0, 0, (BYTE *)&value, &len)) {
+		if (value >= DENSITY_MIN && value <= DENSITY_MAX)
 			g_nDensity      = value;
 	}
 
 	len = sizeof(value);
-	if(ERROR_SUCCESS == RegQueryValueEx(hkey, "FontSize",      0, 0, (BYTE *)&value, &len))
-	{
-		if(value >= FONT_MIN && value <= FONT_MAX)
+	if (ERROR_SUCCESS == RegQueryValueEx(hkey, "FontSize", 0, 0, (BYTE *)&value, &len)) {
+		if (value >= FONT_MIN && value <= FONT_MAX)
 			g_nFontSize	 = value;
 	}
 
-	if(ERROR_SUCCESS == RegQueryValueEx(hkey, "FontBold",      0, 0, (BYTE *)&value, &len))
+	if (ERROR_SUCCESS == RegQueryValueEx(hkey, "FontBold", 0, 0, (BYTE *)&value, &len))
 		g_fFontBold = (value == 0 ? FALSE : TRUE);
 
-	if(ERROR_SUCCESS == RegQueryValueEx(hkey, "Randomize",      0, 0, (BYTE *)&value, &len))
+	if (ERROR_SUCCESS == RegQueryValueEx(hkey, "Randomize", 0, 0, (BYTE *)&value, &len))
 		g_fRandomizeMessages = (value == 0 ? FALSE : TRUE);
 
 	len = 4096;
-	if(ERROR_SUCCESS == RegQueryValueEx(hkey, "FontName",  0, 0, (BYTE *)hugechar, &len))
-	{
-		if(len > 0)
+	if (ERROR_SUCCESS == RegQueryValueEx(hkey, "FontName", 0, 0, (BYTE *)hugechar, &len)) {
+		if (len > 0)
 			lstrcpy(g_szFontName, hugechar);
 		else
 			lstrcpy(g_szFontName, "Arial");
@@ -90,12 +85,9 @@ void LoadSettings()
 	}
 
 	len = 4096;
-	if(ERROR_SUCCESS == RegQueryValueEx(hkey, "Messages",      0, 0 , (BYTE *)hugechar, &len))
-	{
-		while(len > 0 && *hptr && isascii(*hptr))
-		{
-			if(lstrlen(hptr) > 0)
-			{
+	if (ERROR_SUCCESS == RegQueryValueEx(hkey, "Messages", 0, 0, (BYTE *)hugechar, &len)) {
+		while (len > 0 && *hptr && isascii(*hptr)) {
+			if (lstrlen(hptr) > 0) {
 				lstrcpyn(g_szMessages[g_nNumMessages], hptr, MAXMSG_LENGTH);
 				++g_nNumMessages;
 				hptr += lstrlen(hptr) + 1;
@@ -104,15 +96,13 @@ void LoadSettings()
 	}
 
 	len = sizeof(value);
-	if(ERROR_SUCCESS == RegQueryValueEx(hkey, "Hue", 0, 0, (BYTE *)&value, &len))
-	{
-		if(value >= 0 && value <= 255)
+	if (ERROR_SUCCESS == RegQueryValueEx(hkey, "Hue", 0, 0, (BYTE *)&value, &len)) {
+		if (value >= 0 && value <= 255)
 			g_nHue = value;
 	}
 
 	len = sizeof(value);
-	if(ERROR_SUCCESS == RegQueryValueEx(hkey, "Cycle", 0, 0, (BYTE *)&value, &len))
-	{
+	if (ERROR_SUCCESS == RegQueryValueEx(hkey, "Cycle", 0, 0, (BYTE *)&value, &len)) {
 		g_fColorCycle = value;
 	}
 
@@ -130,14 +120,14 @@ void SaveSettings()
 	int i,len;
 	LONG value;
 
-	if(hugechar == 0)
+	if (hugechar == 0)
 		return;
 
 	hugechar[0] = '\0';
 	msgptr = hugechar;
 
 	RegCreateKeyEx(HKEY_CURRENT_USER, "Software\\Catch22\\Matrix Screen Saver", 0,
-		"", 0, KEY_WRITE, NULL, &hkey, NULL);
+	               "", 0, KEY_WRITE, NULL, &hkey, NULL);
 
 	value = g_nMessageSpeed;
 	RegSetValueEx(hkey, "MessageSpeed", 0, REG_DWORD, (BYTE *)&value, sizeof value);
@@ -162,12 +152,10 @@ void SaveSettings()
 	value = g_fColorCycle;
 	RegSetValueEx(hkey, "Cycle", 0, REG_DWORD, (BYTE *)&value, sizeof value);
 
-	for(i = 0; i < g_nNumMessages; i++)
-	{
+	for (i = 0; i < g_nNumMessages; i++) {
 		len = lstrlen(g_szMessages[i]);
 
-		if(len > 0 && totallen+len < 4096)
-		{
+		if (len > 0 && totallen+len < 4096) {
 			lstrcpyn(msgptr, g_szMessages[i], 4096-totallen);
 			totallen += len + 1;
 			msgptr += len + 1;
@@ -178,11 +166,10 @@ void SaveSettings()
 	totallen++;
 
 	RegSetValueEx(hkey, "Messages", 0, REG_MULTI_SZ, (BYTE *)hugechar, totallen);
-	
+
 	value = g_nHue;
 	RegSetValueEx(hkey, "Hue", 0, REG_DWORD, (BYTE *)&value, sizeof value);
 
-	
 	RegCloseKey(hkey);
 	free(hugechar);
 }

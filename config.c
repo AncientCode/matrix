@@ -56,7 +56,7 @@ void UpdatePreview(HWND hwnd)
 	g_nDensity  = SendDlgItemMessage(hwnd, IDC_SLIDER_DENSITY, TBM_GETPOS,0, 0);
 	g_nFontSize = SendDlgItemMessage(hwnd, IDC_SLIDER4, TBM_GETPOS,0, 0);
 
-	g_nMatrixSpeed = SendDlgItemMessage(hwnd, IDC_SLIDER1, TBM_GETPOS, 0, 0);	
+	g_nMatrixSpeed = SendDlgItemMessage(hwnd, IDC_SLIDER1, TBM_GETPOS, 0, 0);
 	SetMessageFont(hwnd, g_szFontName, g_nFontSize, g_fFontBold);
 	InvalidateRect(GetDlgItem(hwnd, IDC_PREVIEW), 0, 0);
 }
@@ -66,9 +66,8 @@ HRESULT CALLBACK PreviewProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
 	RECT rect;
-	switch(uMsg)
-	{
-	//case WM_TIMER:
+	switch (uMsg) {
+		//case WM_TIMER:
 	case WM_PAINT:
 		BeginPaint(hwnd, &ps);
 		GetClientRect(hwnd, &rect);
@@ -96,23 +95,21 @@ BOOL CALLBACK ConfigDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	RECT	rect;
 	static  int prevwidth, prevheight;
 
-	switch(uMsg)
-	{
+	switch (uMsg) {
 	case WM_INITDIALOG:
 
 		prevwidth  = GetSystemMetrics(SM_CXSCREEN) / GLYPH_WIDTH;
 		prevheight = GetSystemMetrics(SM_CYSCREEN) / GLYPH_HEIGHT + 1;
 
 		//Add any saved messages to the combo box
-		for(index = 0; index < g_nNumMessages; index++)
-		{
-			if(lstrlen(g_szMessages[index]) > 0)
+		for (index = 0; index < g_nNumMessages; index++) {
+			if (lstrlen(g_szMessages[index]) > 0)
 				SendDlgItemMessage(hwnd, IDC_COMBO1, CB_ADDSTRING, 0, (LPARAM)g_szMessages[index]);
 		}
 
 		//select the first message, and preview it
 		SendDlgItemMessage(hwnd, IDC_COMBO1, CB_SETCURSEL, 0, 0);
-		
+
 		SendDlgItemMessage(hwnd, IDC_SLIDER1, TBM_SETRANGE, 0, MAKELONG(SPEED_MIN, SPEED_MAX));
 		SendDlgItemMessage(hwnd, IDC_SLIDER_DENSITY, TBM_SETRANGE, 0, MAKELONG(DENSITY_MIN, DENSITY_MAX));
 		SendDlgItemMessage(hwnd, IDC_SLIDER3, TBM_SETRANGE, 0, MAKELONG(MSGSPEED_MIN, MSGSPEED_MAX));
@@ -122,7 +119,7 @@ BOOL CALLBACK ConfigDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		SendDlgItemMessage(hwnd, IDC_SLIDER_DENSITY, TBM_SETTICFREQ, 5, 0);
 		SendDlgItemMessage(hwnd, IDC_SLIDER3, TBM_SETTICFREQ, 50, 0);
 		SendDlgItemMessage(hwnd, IDC_SLIDER4, TBM_SETTICFREQ, 2, 0);
-		
+
 		SendDlgItemMessage(hwnd, IDC_SLIDER1, TBM_SETPOS, TRUE, g_nMatrixSpeed);
 		SendDlgItemMessage(hwnd, IDC_SLIDER_DENSITY, TBM_SETPOS, TRUE, g_nDensity);
 		SendDlgItemMessage(hwnd, IDC_SLIDER3, TBM_SETPOS, TRUE, g_nMessageSpeed);
@@ -145,7 +142,7 @@ BOOL CALLBACK ConfigDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		// subclass the preview2
 		CreateThread(0, 0, PreviewThread, GetDlgItem(hwnd, IDC_PREVIEW2), 0, 0);
 		OldProc = (WNDPROC)SetWindowLong(GetDlgItem(hwnd, IDC_PREVIEW2), GWL_WNDPROC, (LONG)PreviewProc);
-		
+
 		return 0;
 
 	case WM_DESTROY:
@@ -154,39 +151,30 @@ BOOL CALLBACK ConfigDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	case WM_CTLCOLORSTATIC:
 
-		if(GetDlgCtrlID((HWND)lParam) == IDC_ABOUT)
-		{
+		if (GetDlgCtrlID((HWND)lParam) == IDC_ABOUT) {
 			SetTextColor((HDC)wParam, RGB(0,80,0));
 			SetBkColor((HDC)wParam, GetSysColor(COLOR_3DFACE));
 			return (BOOL)GetSysColorBrush(COLOR_3DFACE);
-		}
-		else if(GetDlgCtrlID((HWND)lParam) == IDC_PREVIEW)
-		{
+		} else if (GetDlgCtrlID((HWND)lParam) == IDC_PREVIEW) {
 			HDC hdc = (HDC)wParam;
 			RECT clip;
 
 			GetDlgItemText(hwnd, IDC_COMBO1, buf, 256);
-			
+
 			GetClientRect((HWND)lParam, &rect);
 
-			if(prevwidth < rect.right)
-			{
+			if (prevwidth < rect.right) {
 				rect.left = (rect.right-prevwidth) / 2;
 				rect.right = rect.left + prevwidth;
-			}
-			else
-			{
+			} else {
 				rect.left  = 0;
 				rect.right = prevwidth;
-			}		
+			}
 
-			if(prevheight < rect.bottom)
-			{
+			if (prevheight < rect.bottom) {
 				rect.top = (rect.bottom-prevheight) / 2;
 				rect.bottom = rect.top + prevheight;
-			}
-			else
-			{
+			} else {
 				rect.top = 0;
 				rect.bottom = prevheight;
 			}
@@ -211,48 +199,44 @@ BOOL CALLBACK ConfigDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 			// now draw it!
 			DrawText(hdc, buf, -1, &rect, DT_CENTER|DT_VCENTER|DT_WORDBREAK);
-			
+
 
 			return (BOOL)GetStockObject(NULL_BRUSH);
-		}	
-		else
-		{
+		} else {
 			break;
 		}
 
 	case WM_HSCROLL:
 
 		//if((HWND)lParam == GetDlgItem(hwnd, IDC_SLIDER4))
-		{
-			HWND hwndMatrix = GetWindow(GetDlgItem(hwnd, IDC_PREVIEW2), GW_CHILD);
-			MATRIX *matrix = GetMatrix(hwndMatrix);
+	{
+		HWND hwndMatrix = GetWindow(GetDlgItem(hwnd, IDC_PREVIEW2), GW_CHILD);
+		MATRIX *matrix = GetMatrix(hwndMatrix);
 
-			if(matrix)
+		if (matrix) {
+
+			// one of the sliders changed..update
+			UpdatePreview(hwnd);
+
+			SetTimer(hwndMatrix, 0xdeadbeef, ((SPEED_MAX - g_nMatrixSpeed) + SPEED_MIN) * 10, 0);
+
+			//if((HWND)lParam == GetDlgItem(hwnd, IDC_SLIDER_H))
 			{
-				
-				// one of the sliders changed..update
-				UpdatePreview(hwnd);
-				
-				SetTimer(hwndMatrix, 0xdeadbeef, ((SPEED_MAX - g_nMatrixSpeed) + SPEED_MIN) * 10, 0);
-				
-				//if((HWND)lParam == GetDlgItem(hwnd, IDC_SLIDER_H))
-				{
-					g_nHue = SendDlgItemMessage(hwnd, IDC_SLIDER_H, TBM_GETPOS,0, 0);
-					
-					SetMatrixBitmap(matrix, g_nHue);
-					
-				}
-				RefreshMatrix(hwndMatrix);
-			}
+				g_nHue = SendDlgItemMessage(hwnd, IDC_SLIDER_H, TBM_GETPOS,0, 0);
 
+				SetMatrixBitmap(matrix, g_nHue);
+
+			}
+			RefreshMatrix(hwndMatrix);
 		}
 
-		return 0;
+	}
+
+	return 0;
 
 	case WM_COMMAND:
 
-		switch(HIWORD(wParam))
-		{
+		switch (HIWORD(wParam)) {
 		case CBN_EDITCHANGE:
 		case CBN_SELCHANGE:
 
@@ -260,13 +244,12 @@ BOOL CALLBACK ConfigDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			index = SendDlgItemMessage(hwnd, IDC_COMBO2, CB_GETCURSEL, 0, 0);
 			SendDlgItemMessage(hwnd, IDC_COMBO2, CB_GETLBTEXT, index, (LPARAM)g_szFontName);
 			//SetMessageFont(hwnd, g_szFontName, g_nFontSize, TRUE);
-			
+
 			UpdatePreview(hwnd);
 			return 0;
 		}
 
-		switch(LOWORD(wParam))
-		{
+		switch (LOWORD(wParam)) {
 		case IDC_RANDOM:
 			g_fRandomizeMessages = IsDlgButtonChecked(hwnd, IDC_RANDOM);
 			break;
@@ -281,36 +264,35 @@ BOOL CALLBACK ConfigDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case IDOK:
-			
+
 			hwndCtrl = GetDlgItem(hwnd, IDC_COMBO1);
 
 			items = min(MAX_MESSAGES, SendMessage(hwndCtrl, CB_GETCOUNT, 0, 0));
 
-			for(index = 0; index < items; index++)
-			{
+			for (index = 0; index < items; index++) {
 				SendMessage(hwndCtrl, CB_GETLBTEXT, index, (LPARAM)g_szMessages[index]);
 			}
 
 			g_nNumMessages = items;
-			
+
 			//matrix speed
-			val = SendDlgItemMessage(hwnd, IDC_SLIDER1, TBM_GETPOS, 0, 0);	
-			if(val >= SPEED_MIN && val <= SPEED_MAX)
+			val = SendDlgItemMessage(hwnd, IDC_SLIDER1, TBM_GETPOS, 0, 0);
+			if (val >= SPEED_MIN && val <= SPEED_MAX)
 				g_nMatrixSpeed = val;
 
 			//density
-			val = SendDlgItemMessage(hwnd, IDC_SLIDER_DENSITY, TBM_GETPOS, 0, 0);	
-			if(val >= DENSITY_MIN && val <= DENSITY_MAX)
+			val = SendDlgItemMessage(hwnd, IDC_SLIDER_DENSITY, TBM_GETPOS, 0, 0);
+			if (val >= DENSITY_MIN && val <= DENSITY_MAX)
 				g_nDensity = val;
 
 			//message speed
-			val = SendDlgItemMessage(hwnd, IDC_SLIDER3, TBM_GETPOS, 0, 0);	
-			if(val >= MSGSPEED_MIN && val <= MSGSPEED_MAX)
+			val = SendDlgItemMessage(hwnd, IDC_SLIDER3, TBM_GETPOS, 0, 0);
+			if (val >= MSGSPEED_MIN && val <= MSGSPEED_MAX)
 				g_nMessageSpeed = val;
 
 			//font size
-			val = SendDlgItemMessage(hwnd, IDC_SLIDER4, TBM_GETPOS, 0, 0);	
-			if(val >= FONT_MIN && val <= FONT_MAX)
+			val = SendDlgItemMessage(hwnd, IDC_SLIDER4, TBM_GETPOS, 0, 0);
+			if (val >= FONT_MIN && val <= FONT_MAX)
 				g_nFontSize = val;
 
 			SaveSettings();
@@ -322,14 +304,13 @@ BOOL CALLBACK ConfigDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			return TRUE;
 
 		case IDC_ADD:
-			
+
 			hwndCombo = GetDlgItem(hwnd, IDC_COMBO1);
-			
-			if(GetWindowText(hwndCombo, buf, 256))
-			{
+
+			if (GetWindowText(hwndCombo, buf, 256)) {
 				SendMessage(hwndCombo, CB_ADDSTRING, 0, (LPARAM)buf);
 			}
-			
+
 			UpdatePreview(hwnd);
 
 			return 0;
@@ -367,14 +348,14 @@ int Configure(HWND hwndParent)
 	InitCommonControlsEx(&icc);
 
 #ifdef _DEBUG
-	if(hwndParent == NULL)
+	if (hwndParent == NULL)
 		hwndParent = 0;
 #else
-	if(hwndParent == NULL)
+	if (hwndParent == NULL)
 		hwndParent = GetForegroundWindow();
 #endif
 
 	DialogBox(GetModuleHandle(0), MAKEINTRESOURCE(IDD_CONFIG), hwndParent, ConfigDlgProc);
-	
+
 	return 0;
 }

@@ -27,7 +27,7 @@ WORD crc_msgrand(WORD reg)
 {
 	const WORD mask = 0xb400;
 
-	if(reg & 1)
+	if (reg & 1)
 		reg = (reg >> 1) ^ mask;
 	else
 		reg = (reg >> 1);
@@ -43,12 +43,12 @@ void SetMatrixMessage(MATRIX_MESSAGE *msg, HFONT hFont, char *text)
 	HDC		hdc;
 	RECT	rect;
 	int		x, y;
-	
+
 	HDC		hdcMessage;
 	HBITMAP hbmMessage;
 
 	HANDLE	hOldFont, hOldBmp;
-	
+
 	//
 	// Create a monochrome off-screen buffer
 	//
@@ -75,10 +75,8 @@ void SetMatrixMessage(MATRIX_MESSAGE *msg, HFONT hFont, char *text)
 	//
 	// Convert bitmap into an array of cells for easy drawing
 	//
-	for(y = 0; y < msg->height; y++)
-	{
-		for(x = 0; x < msg->width; x++)
-		{
+	for (y = 0; y < msg->height; y++) {
+		for (x = 0; x < msg->width; x++) {
 			msg->message[x][y] = GetPixel(hdcMessage, x, y) ? 0 : 1;
 		}
 	}
@@ -101,13 +99,12 @@ void DrawMatrixMessage(MATRIX *matrix, MATRIX_MESSAGE *msg, HDC hdc)
 {
 	int x, y;
 
-	for(x = 0; x < msg->width; x++)
-		for(y = 0; y < msg->height; y++)
-			if((msg->message[x][y] & GLYPH_REDRAW) && 
-			   (msg->message[x][y] & 0x00FF)
-			   //&& (x % 3)
-			   )
-			{
+	for (x = 0; x < msg->width; x++)
+		for (y = 0; y < msg->height; y++)
+			if ((msg->message[x][y] & GLYPH_REDRAW) &&
+			        (msg->message[x][y] & 0x00FF)
+			        //&& (x % 3)
+			   ) {
 				DrawGlyph(matrix, hdc, x * GLYPH_WIDTH, y * GLYPH_HEIGHT, RandomGlyph(MAX_INTENSITY));
 			}
 }
@@ -117,14 +114,13 @@ void DrawMatrixMessage(MATRIX *matrix, MATRIX_MESSAGE *msg, HDC hdc)
 //
 void RevealMatrixMessage(MATRIX_MESSAGE *msg, int amount)
 {
-	while(amount--)
-	{
+	while (amount--) {
 		int pos;
-		
+
 		msg->random_reg1 = crc_msgrand(msg->random_reg1);
 		pos = msg->random_reg1 & 0xffff;
 
-		msg->message[pos / 256][pos % 256] |= GLYPH_REDRAW; 
+		msg->message[pos / 256][pos % 256] |= GLYPH_REDRAW;
 	}
 }
 
@@ -135,8 +131,8 @@ void ClearMatrixMessage(MATRIX_MESSAGE *msg)
 {
 	int x, y;
 
-	for(x = 0; x < msg->width; x++)
-		for(y = 0; y < msg->height; y++)
+	for (x = 0; x < msg->width; x++)
+		for (y = 0; y < msg->height; y++)
 			msg->message[x][y] = 0;
 }
 
@@ -157,42 +153,39 @@ void DoMatrixMessage(HDC hdc, MATRIX *matrix)
 
 	int RealSpeed = MessageSpeed();
 
-	if(g_nNumMessages > 0)
-	{
+	if (g_nNumMessages > 0) {
 		// nothing to do yet..
-		if(msg->counter++ < 0)
+		if (msg->counter++ < 0)
 			return;
 
 		// has counter reached limit..clear the message
-		if(msg->counter++ == RealSpeed / 2 + (RealSpeed/4))
+		if (msg->counter++ == RealSpeed / 2 + (RealSpeed/4))
 			ClearMatrixMessage(msg);
 
 		// reset counter + display a new message
-		if(msg->counter >= RealSpeed)
-		{
+		if (msg->counter >= RealSpeed) {
 			// mark all message-cells as being "invisible" so the
 			// message gets cleared by the matrix decoding naturally
-		
-			if(g_fRandomizeMessages)
+
+			if (g_fRandomizeMessages)
 				msg->msgindex = crc_rand() % g_nNumMessages;
 			else
 				msg->msgindex = (msg->msgindex + 1) % g_nNumMessages;
 
 			// make a new message..initially invisible
 			SetMatrixMessage(msg, 0, g_szMessages[msg->msgindex]);
-			
+
 			msg->counter = -(int)(crc_rand() % MSGSPEED_MAX);
 		}
 		// reveal the next part of the message
-		else if(msg->counter < RealSpeed / 2)
-		{
+		else if (msg->counter < RealSpeed / 2) {
 			int w = (g_nMessageSpeed - MSGSPEED_MIN);
 			w = (1 << 16) + ((w<<16) / MSGSPEED_MAX);
 			w = (w * 3 * g_nMessageSpeed) >> 16;
-			
+
 			RevealMatrixMessage(msg, w + 100);
 		}
-			
+
 		//
 		// draw whatever part of the message is visible at this time
 		//
@@ -215,13 +208,12 @@ void SetMessageFont(HWND hwnd, char *szFontName, int nPointSize, BOOL fBold)
 
 	ReleaseDC(hwnd, hdc);
 
-	hFont = CreateFont(lfHeight, 0, 0, 0, fBold ? FW_BOLD: FW_NORMAL, 0, 0, 0, 
-		ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, 
-		ANTIALIASED_QUALITY, DEFAULT_PITCH, szFontName);
+	hFont = CreateFont(lfHeight, 0, 0, 0, fBold ? FW_BOLD: FW_NORMAL, 0, 0, 0,
+	                   ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+	                   ANTIALIASED_QUALITY, DEFAULT_PITCH, szFontName);
 
-	if(hFont != 0)
-	{
-		if(g_hFont != 0)
+	if (hFont != 0) {
+		if (g_hFont != 0)
 			DeleteObject(g_hFont);
 
 		g_hFont = hFont;
@@ -235,7 +227,7 @@ MATRIX_MESSAGE *InitMatrixMessage(HWND hwnd, int width, int height)
 {
 	MATRIX_MESSAGE *msg;
 
-	if((msg = malloc(sizeof(MATRIX_MESSAGE))) == 0)
+	if ((msg = malloc(sizeof(MATRIX_MESSAGE))) == 0)
 		return 0;
 
 	ClearMatrixMessage(msg);
@@ -244,7 +236,7 @@ MATRIX_MESSAGE *InitMatrixMessage(HWND hwnd, int width, int height)
 	msg->width    = min(width, MAXMSG_WIDTH);
 	msg->height   = min(height, MAXMSG_HEIGHT);
 	msg->counter  = -(int)(crc_rand() % MSGSPEED_MIN + MSGSPEED_MIN);
-	
+
 	msg->random_reg1 = (WORD)GetTickCount();
 
 	SetMessageFont(hwnd, g_szFontName, g_nFontSize, g_fFontBold);
